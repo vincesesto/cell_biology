@@ -1,0 +1,72 @@
+<dashboard script="cell_layout.js" stylesheet="cell_layout.css" >
+  <label>Cell Simulation Counts</label>
+  <description>Show a breakdown of cells in our logs</description>
+  <row>
+    <panel>
+      <single>
+        <title>Zero Cell Count</title>
+        <search>
+          <query><![CDATA[ index=main sourcetype=cellsimulation | eval data=_raw | rex field=data max_match=0 "(?<cells>\@)" | stats count(cells) AS Count by _time | where Count=0 | stats Count | eval class=if(Count>1000,"severe","low") ]]> </query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="classField">class</option>
+        <option name="drilldown">none</option>
+        <option name="linkView">search</option>
+        <option name="underLabel">No Alive Cells</option>
+      </single>
+<!--    </panel> -->
+<!--  </row> -->
+<!--  <row> -->
+<!--    <panel> -->
+      <single>
+        <title>Small Cell Count</title>
+        <search>
+          <query><![CDATA[ index=main sourcetype=cellsimulation | eval data=_raw | rex field=data max_match=0 "(?<cells>\@)" | stats count(cells) AS Count by _time | where Count<=10 | stats count ]]> </query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="linkView">search</option>
+        <option name="underLabel">Alive Cells</option>
+      </single>
+    </panel>
+    <panel> -->
+      <single>
+        <title>Larger Cell Count</title>
+        <search>
+          <query><![CDATA[ index=main sourcetype=cellsimulation | eval data=_raw | rex field=data max_match=0 "(?<cells>\@)" | stats count(cells) AS Count by _time | where Count>=20 | stats count ]]> </query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="linkView">search</option>
+        <option name="underLabel">Alive Cells</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Cell Count Ranges</title>
+        <search>
+          <query><![CDATA[ index=main sourcetype=cellsimulation | eval data=_raw | rex field=data max_match=0 "(?<cells>\@)" | stats count(cells) AS Count by _time | eval description=case(Count<=10, "LOW", Count<=20, "MEDIUM", Count>20 , "HIGH") | stats count(eval(description="LOW")) as LOW count(eval(description="MEDIUM")) as MEDIUM count(eval(description="HIGH")) as HIGH by description ]]> </query>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.fieldColors">
+        {"LOW": 0xFF0000, "MEDIUM": 0xFF9900, "HIGH":0x009900, "NULL":0xC4C4C0}
+        </option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table id="tableWithBar1">
+        <title>More Cell Count Ranges</title>
+        <search>
+          <query><![CDATA[ index=main sourcetype=cellsimulation | eval data=_raw | rex field=data max_match=0 "(?<cells>\@)" | stats count(cells) AS Count by _time | eval description=case(Count<=10, "LOW", Count<=20, "MEDIUM", Count>20 , "HIGH") | top description ]]> </query>
+        </search>
+      </table>
+    </panel>
+  </row>
+</dashboard>
